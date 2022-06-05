@@ -12,7 +12,6 @@ import 'package:users_app/assistants/geofire_assistant.dart';
 import 'package:users_app/infoHandler/app_info.dart';
 import 'package:users_app/main.dart';
 import 'package:users_app/models/active_nearby_available_drivers.dart';
-import 'package:users_app/models/direction_details_info.dart';
 import 'package:users_app/screens/select_nearest_active_driver_screen.dart';
 import 'package:users_app/widgets/progress_dialog.dart';
 import './search_places_screen.dart';
@@ -57,6 +56,9 @@ class _MainScreenState extends State<MainScreen> {
   bool activeNearbyDriverKeyLoaded = false;
   //  Show marker icon for nearby Drivers
   BitmapDescriptor? activeNearbyIcon;
+
+  // Store user ride request
+  DatabaseReference? referenceRideRequest;
 
   // Show Active Nearby Available Riders
   List<ActiveNearbyAvaibleDrivers> onlineNearbyAvailableDriversList = [];
@@ -379,6 +381,8 @@ class _MainScreenState extends State<MainScreen> {
     if (onlineNearbyAvailableDriversList.length == 0) {
       // Check if the length is zero
       // Cancel the ride request
+      referenceRideRequest!
+          .remove(); // referenceRideRequest was set from saveRideInformation()
       // Clear the polyline and marker set
       setState(() {
         polyLineSet.clear();
@@ -400,16 +404,81 @@ class _MainScreenState extends State<MainScreen> {
     }
     // Retrieve Online Drivers Information
     await _retrieveOnlineDriversInformation(onlineNearbyAvailableDriversList);
-    Navigator.of(context).push(
+    // Send User to A Page that shows nearest online user and allow user to select
+    var response = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => SelectNearestActiveDriverScreen(),
+        builder: (context) => SelectNearestActiveDriverScreen(
+            referenceRideRequest: referenceRideRequest),
       ),
     );
+    // Check if driver was selected
+    if (response == "driverSelected") {
+      // Search using the global variable choosenDriverId
+      FirebaseDatabase.instance
+          .ref()
+          .child("drivers")
+          .child(choosenDriverId)
+          .once()
+          .then((snapShot) {
+        // Check if choosen Driver ID exist in the DB
+        if (snapShot.snapshot.value != null) {
+          // Send Notification to that specific Driver
+          sendNotificationToDriverNow(choosenDriverId);
+        } else {
+          Fluttertoast.showToast(msg: "This driver do not exist. Try again.");
+        }
+      });
+    }
+  }
+
+  // Send Notification to choosen Driver
+  sendNotificationToDriverNow(String driverId) {
+    // Change Driver NewRideStatus from idle to rideRequestID
+    // Driver choosed
+    FirebaseDatabase.instance
+        .ref()
+        .child("drivers")
+        .child(driverId)
+        .child("newRideStatus")
+        .set(referenceRideRequest!.key);
+
+    // Automate the push Notification
   }
 
   // Initialize available riders once dropoff location has been set
   void _saveRideRequestInformation() {
     // Save the RideRequest Information
+    referenceRideRequest =
+        FirebaseDatabase.instance.ref().child("All Ride Requests").push();
+    // Get Pickup Location
+    var originLocation =
+        Provider.of<AppInfo>(context, listen: false).userPickUpLocation;
+    // Get Dropoff Location
+    var destinationLocation =
+        Provider.of<AppInfo>(context, listen: false).userDropOffLocation;
+
+    // Get LatLng MAp for orgin and destination locations;
+    Map originLocationMap = {
+      "latitude": originLocation!.locationLatitude.toString(),
+      "longitude": originLocation.locationLongitude.toString(),
+    };
+    Map destinationLocationMap = {
+      "latitude": destinationLocation!.locationLatitude.toString(),
+      "longitude": destinationLocation.locationLongitude.toString(),
+    };
+
+    // Get Full User Ride Information to Store in the Database
+    Map userInformationMap = {
+      "origin": originLocationMap,
+      "destination": destinationLocationMap,
+      "time": DateTime.now().toString(),
+      "userName": userModelCurrentInfo!.name,
+      "userPhone": userModelCurrentInfo!.phone,
+      "originAddress": originLocation.humanReadableAddress,
+      "destinationAddress": destinationLocation.humanReadableAddress,
+      "driverId": "waiting",
+    };
+    referenceRideRequest!.set(userInformationMap);
 
     // Assisgn nearby available drivers list
     onlineNearbyAvailableDriversList =

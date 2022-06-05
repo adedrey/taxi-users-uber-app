@@ -11,3 +11,6 @@ List dList = [];
 
 // Store Trip Direction Detail Info
 DirectionDetailsInfo? tripDirectionDetailInfo;
+
+// Store Choosen Driver ID
+String choosenDriverId = "";

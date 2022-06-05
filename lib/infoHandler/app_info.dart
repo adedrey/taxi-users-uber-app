@@ -7,9 +7,11 @@ class AppInfo extends ChangeNotifier {
 
   void updatePickupLocationAddress(Directions userPickUpAddress) {
     userPickUpLocation = Directions(
-        locationLatitude: userPickUpAddress.locationLatitude,
-        locationLongitude: userPickUpAddress.locationLongitude,
-        locationName: userPickUpAddress.locationName);
+      locationLatitude: userPickUpAddress.locationLatitude,
+      locationLongitude: userPickUpAddress.locationLongitude,
+      locationName: userPickUpAddress.locationName,
+      humanReadableAddress: userPickUpAddress.locationName,
+    );
     notifyListeners();
   }
 
@@ -19,6 +21,7 @@ class AppInfo extends ChangeNotifier {
       locationLongitude: dropOffAddress.locationLongitude,
       locationName: dropOffAddress.locationName,
       locationId: dropOffAddress.locationId,
+      humanReadableAddress: dropOffAddress.locationName,
     );
     notifyListeners();
   }
