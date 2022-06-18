@@ -17,3 +17,7 @@ String choosenDriverId = "";
 
 // Initialize UserDropOFfAddress for Notification
 String userDropOffAddress = "";
+//To Display on AssignedDriverContainer
+String driverCarDetails = "";
+String driverName = "";
+String driverPhone = "";

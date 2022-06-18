@@ -68,6 +68,8 @@ class _MainScreenState extends State<MainScreen> {
 
   // Assigned Driver Ride Status
   String driverRideStatus = "Driver is Coming";
+  // Listen to assigned driver details after it ride request has been accepted
+  StreamSubscription<DatabaseEvent>? tripRideRequestInfoStreamSubscription;
 
   // Show Active Nearby Available Riders
   List<ActiveNearbyAvaibleDrivers> onlineNearbyAvailableDriversList = [];
@@ -563,6 +565,38 @@ class _MainScreenState extends State<MainScreen> {
       "driverId": "waiting",
     };
     referenceRideRequest!.set(userInformationMap);
+
+    // Listen to assigned driver details after it ride request has been accepted
+    tripRideRequestInfoStreamSubscription =
+        referenceRideRequest!.onValue.listen((eventSnapShot) {
+      if (eventSnapShot.snapshot.value != null) {
+        return;
+      }
+      // To listen to driver car details
+      if ((eventSnapShot.snapshot.value as Map)["car_details"] != null) {
+        // ...
+        setState(() {
+          driverCarDetails =
+              (eventSnapShot.snapshot.value as Map)["car_details"].toString();
+        });
+      }
+      // To listen to driver phone
+      if ((eventSnapShot.snapshot.value as Map)["driverPhone"] != null) {
+        // ...
+        setState(() {
+          driverPhone =
+              (eventSnapShot.snapshot.value as Map)["driverPhone"].toString();
+        });
+      }
+      // To listen to driver name
+      if ((eventSnapShot.snapshot.value as Map)["driverName"] != null) {
+        // ...
+        setState(() {
+          driverName =
+              (eventSnapShot.snapshot.value as Map)["driverName"].toString();
+        });
+      }
+    });
 
     // Assisgn nearby available drivers list
     onlineNearbyAvailableDriversList =
@@ -1064,7 +1098,7 @@ class _MainScreenState extends State<MainScreen> {
 
                     // Driver Vehicle Details
                     Text(
-                      "Tesla Model S",
+                      driverCarDetails,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 16,
@@ -1077,7 +1111,7 @@ class _MainScreenState extends State<MainScreen> {
 
                     // Driver Name
                     Text(
-                      "John Parker",
+                      driverName,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 20,
