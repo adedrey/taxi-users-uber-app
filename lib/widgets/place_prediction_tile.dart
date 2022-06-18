@@ -23,7 +23,7 @@ class _PlacePredictionListTileState extends State<PlacePredictionListTile> {
     showDialog(
         context: context,
         builder: (context) => ProgressDialog(
-              message: "Setting Up Drop-off. Please wait...",
+              message: "Please wait...",
             ));
     String placeDirectionDetailsUrl =
         "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$googleApiKey";

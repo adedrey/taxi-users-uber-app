@@ -70,6 +70,8 @@ class _MainScreenState extends State<MainScreen> {
   String driverRideStatus = "Driver is Coming";
   // Listen to assigned driver details after it ride request has been accepted
   StreamSubscription<DatabaseEvent>? tripRideRequestInfoStreamSubscription;
+  String userRideRequestStatus = "";
+  bool requestPositionInfo = true;
 
   // Show Active Nearby Available Riders
   List<ActiveNearbyAvaibleDrivers> onlineNearbyAvailableDriversList = [];
@@ -569,9 +571,10 @@ class _MainScreenState extends State<MainScreen> {
     // Listen to assigned driver details after it ride request has been accepted
     tripRideRequestInfoStreamSubscription =
         referenceRideRequest!.onValue.listen((eventSnapShot) {
-      if (eventSnapShot.snapshot.value != null) {
-        return;
-      }
+      // if (eventSnapShot.snapshot.value != null) {
+      //   print("returned null");
+      //   return;
+      // }
       // To listen to driver car details
       if ((eventSnapShot.snapshot.value as Map)["car_details"] != null) {
         // ...
@@ -596,6 +599,46 @@ class _MainScreenState extends State<MainScreen> {
               (eventSnapShot.snapshot.value as Map)["driverName"].toString();
         });
       }
+
+      // To listen Driver RideRequest Status
+      if ((eventSnapShot.snapshot.value as Map)["status"] != null) {
+        setState(() {
+          userRideRequestStatus =
+              (eventSnapShot.snapshot.value as Map)["status"].toString();
+        });
+      }
+
+      // To listen to Driver current location
+      if ((eventSnapShot.snapshot.value as Map)["driverLocation"] != null) {
+        // ...
+        double driverCurrentPositionLat = double.parse(
+            (eventSnapShot.snapshot.value as Map)["driverLocation"]["latitude"]
+                .toString());
+        double driverCurrentPositionLng = double.parse(
+            (eventSnapShot.snapshot.value as Map)["driverLocation"]["longitude"]
+                .toString());
+        LatLng driverCurrentPositionLatLng = LatLng(
+          driverCurrentPositionLat,
+          driverCurrentPositionLng,
+        );
+
+        // Status = accepted
+        if (userRideRequestStatus == "accepted") {
+          updateArrivalToUserPickupLocation(driverCurrentPositionLatLng);
+        }
+
+        // Status = arrived
+        if (userRideRequestStatus == "arrived") {
+          setState(() {
+            driverRideStatus = "Driver has Arrived";
+          });
+        }
+
+        // Status = ontrip
+        if (userRideRequestStatus == "ontrip") {
+          updateReachingTimeToUserDropOffLocation(driverCurrentPositionLatLng);
+        }
+      }
     });
 
     // Assisgn nearby available drivers list
@@ -603,6 +646,61 @@ class _MainScreenState extends State<MainScreen> {
         GeoFireAssistant.activeNearbyAvailableDriversList;
     // Checks if there is any online available driver
     _searchNearstOnlineDrivers();
+  }
+
+  // Called when Driver has accepted ride request from user
+  updateArrivalToUserPickupLocation(LatLng driverCurrentPositionLatLng) async {
+    if (requestPositionInfo == true) {
+      requestPositionInfo =
+          false; // to execute the code below before it is being read again
+      LatLng userPickUpPosition = LatLng(
+        userCurrentPosiiton!.latitude,
+        userCurrentPosiiton!.longitude,
+      );
+      var directionDetailsInfo =
+          await AssistantMethods.obtainOriginToDestinationDirectionDetails(
+        driverCurrentPositionLatLng,
+        userPickUpPosition,
+      );
+
+      if (directionDetailsInfo == null) {
+        return;
+      }
+      setState(() {
+        driverRideStatus = "Driver is Coming :: " +
+            directionDetailsInfo.duration_text.toString();
+      });
+      requestPositionInfo = true;
+    }
+  }
+
+  // Called when Driver has started trip
+  updateReachingTimeToUserDropOffLocation(
+      LatLng driverCurrentPositionLatLng) async {
+    if (requestPositionInfo == true) {
+      requestPositionInfo =
+          false; // to execute the code below before it is being read again
+      var dropOffLocation =
+          Provider.of<AppInfo>(context, listen: false).userDropOffLocation;
+      LatLng userDestinationPosition = LatLng(
+        dropOffLocation!.locationLatitude!,
+        dropOffLocation.locationLongitude!,
+      );
+      var directionDetailsInfo =
+          await AssistantMethods.obtainOriginToDestinationDirectionDetails(
+        driverCurrentPositionLatLng,
+        userDestinationPosition,
+      );
+
+      if (directionDetailsInfo == null) {
+        return;
+      }
+      setState(() {
+        driverRideStatus = "Going towards Destination :: " +
+            directionDetailsInfo.duration_text.toString();
+      });
+      requestPositionInfo = true;
+    }
   }
 
   @override
