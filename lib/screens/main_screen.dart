@@ -1,3 +1,4 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -38,6 +39,7 @@ class _MainScreenState extends State<MainScreen> {
   );
   GlobalKey<ScaffoldState> sKey = GlobalKey<ScaffoldState>();
   double searchLocationContainerHeight = 220;
+  double waitingResponseFromDriverContainerHeight = 0;
   Position? userCurrentPosiiton;
   var geoLocator = Geolocator();
   LocationPermission? _locationPermission;
@@ -467,6 +469,7 @@ class _MainScreenState extends State<MainScreen> {
         Fluttertoast.showToast(msg: "Notification sent successfully");
 
         // Waiting response or action from driver
+        showWaitingResponseFromDriverUI();
 
         // Driver Actions - Cancel or Accept
         FirebaseDatabase.instance
@@ -500,6 +503,15 @@ class _MainScreenState extends State<MainScreen> {
                 "Please choose another driver. Registration Token hasn't been set for this driver");
         return;
       }
+    });
+  }
+
+  // Waiting response or action from driver
+  showWaitingResponseFromDriverUI() {
+    // Disappear the Position UserDropOff & userPickup Location Container
+    setState(() {
+      searchLocationContainerHeight = 0;
+      waitingResponseFromDriverContainerHeight = 220;
     });
   }
 
@@ -947,7 +959,50 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
             ),
-          )
+          ),
+          // UI for waiting response from driver
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: waitingResponseFromDriverContainerHeight,
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Center(
+                  child: AnimatedTextKit(
+                    animatedTexts: [
+                      FadeAnimatedText(
+                        'Waiting for response\nfrom Driver',
+                        textAlign: TextAlign.center,
+                        duration: const Duration(seconds: 6),
+                        textStyle: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 30.0,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      ScaleAnimatedText(
+                        ' wait...',
+                        textAlign: TextAlign.center,
+                        duration: const Duration(seconds: 10),
+                        textStyle: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32.0,
+                            fontFamily: 'Canterbury'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
