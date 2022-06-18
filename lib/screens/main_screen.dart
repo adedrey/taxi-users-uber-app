@@ -1,5 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -464,6 +465,35 @@ class _MainScreenState extends State<MainScreen> {
           context,
         );
         Fluttertoast.showToast(msg: "Notification sent successfully");
+
+        // Waiting response or action from driver
+
+        // Driver Actions - Cancel or Accept
+        FirebaseDatabase.instance
+            .ref()
+            .child("drivers")
+            .child(driverId)
+            .child("newRideStatus")
+            .onValue // whenever the value changes
+            .listen((eventSnapShot) {
+          // 1. Driver can cancel the rideRequest :: Push Notification
+          // newRideStatus = idle
+          if (eventSnapShot.snapshot.value == "idle") {
+            Fluttertoast.showToast(
+                msg:
+                    "The Driver has cancelled your request. Please choose another driver.");
+            Future.delayed(const Duration(milliseconds: 3000), () {
+              Fluttertoast.showToast(msg: "Restart App now.");
+              // SystemNavigator.pop();
+              MyApp.restartApp(context);
+            });
+          }
+          // 2. Driver can accept the rideRequest :: Push Notification
+          // newRideStatus = accepted
+          if (eventSnapShot.snapshot.value == "accepted") {
+            // Design and Display Driver Information
+          }
+        });
       } else {
         Fluttertoast.showToast(
             msg:
