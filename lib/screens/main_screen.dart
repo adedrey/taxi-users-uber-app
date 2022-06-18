@@ -40,7 +40,10 @@ class _MainScreenState extends State<MainScreen> {
   Position? userCurrentPosiiton;
   var geoLocator = Geolocator();
   LocationPermission? _locationPermission;
+  // Add Padding to Map to display Google Logo in order for app to be accepted
   double bottomPaddingOfMap = 0;
+
+  // Set Username, UserEmail before the app fully loads
   String userName = 'your Name';
   String userEmail = 'your Email';
   String userPickUpLocation = 'Your Current Location';
@@ -305,7 +308,6 @@ class _MainScreenState extends State<MainScreen> {
       10,
     )!
         .listen((map) {
-      print(map);
       if (map != null) {
         var callBack = map['callBack'];
 
@@ -443,6 +445,32 @@ class _MainScreenState extends State<MainScreen> {
         .set(referenceRideRequest!.key);
 
     // Automate the push Notification
+    // Get Choosen Driver Device Token
+    FirebaseDatabase.instance
+        .ref()
+        .child("drivers")
+        .child(driverId)
+        .child("token")
+        .once()
+        .then((snapShot) {
+      if (snapShot.snapshot.value != null) {
+        // Get Device Registration Token
+        String deviceRegistrationToken = snapShot.snapshot.value.toString();
+
+        // Send Notification
+        AssistantMethods.sendNotificationToDriverNow(
+          deviceRegistrationToken,
+          referenceRideRequest!.key.toString(),
+          context,
+        );
+        Fluttertoast.showToast(msg: "Notification sent successfully");
+      } else {
+        Fluttertoast.showToast(
+            msg:
+                "Please choose another driver. Registration Token hasn't been set for this driver");
+        return;
+      }
+    });
   }
 
   // Initialize available riders once dropoff location has been set
@@ -509,13 +537,15 @@ class _MainScreenState extends State<MainScreen> {
     // destination latln
     var destinationLatLng = LatLng(destinationPosition!.locationLatitude!,
         destinationPosition.locationLongitude!);
-
+    // Keep User waiting
     showDialog(
       context: context,
       builder: (context) => ProgressDialog(
         message: "Please wait...",
       ),
     );
+    // Obtain the Origin to Destination Direction Details
+    // Direction details contains the polyLine e_points and some other info
     var directionDetailsInfo =
         await AssistantMethods.obtainOriginToDestinationDirectionDetails(
             originLatLng, destinationLatLng);
@@ -523,13 +553,16 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       tripDirectionDetailInfo = directionDetailsInfo;
     });
+    // Cancel the show dialog
     Navigator.of(context).pop();
     // Decode the encoded points
     PolylinePoints pPoints = PolylinePoints();
     List<PointLatLng> decodedPpointsReultList =
         pPoints.decodePolyline(directionDetailsInfo!.e_points!);
     pLineCoOrdinatesList.clear();
+    // Check if decoded points are not empty
     if (decodedPpointsReultList.isNotEmpty) {
+      // Insert each decoded points LatLng in pLineCoOrdinates
       decodedPpointsReultList.forEach(
         (PointLatLng pointLatLng) {
           pLineCoOrdinatesList.add(
@@ -540,6 +573,7 @@ class _MainScreenState extends State<MainScreen> {
     }
     polyLineSet.clear();
     setState(() {
+      // Draw the polyLine
       Polyline polyLine = Polyline(
         polylineId: const PolylineId("PolylineID"),
         color: Colors.redAccent,
@@ -576,6 +610,7 @@ class _MainScreenState extends State<MainScreen> {
         northeast: destinationLatLng,
       );
     }
+    // Display PolyLine on Map
     _newGoogleMapController!
         .animateCamera(CameraUpdate.newLatLngBounds(boundsLatLng, 65));
     Marker originMarker = Marker(

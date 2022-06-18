@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:users_app/infoHandler/app_info.dart';
-import 'package:users_app/models/direction_details_info.dart';
+import 'package:http/http.dart' as http;
+import '../infoHandler/app_info.dart';
+import '../models/direction_details_info.dart';
 import '../assistants/request_assistant.dart';
 import '../global/global.dart';
 import '../infoHandler/directions.dart';
@@ -96,5 +100,42 @@ class AssistantMethods {
     double localCurrencyTotalFareAmount = totalFareAmount * 400;
 
     return double.parse(localCurrencyTotalFareAmount.toStringAsFixed(1));
+  }
+
+  // Send Notification To Driver
+  static sendNotificationToDriverNow(String deviceRegistrationToken,
+      String userRideRequestId, BuildContext context) async {
+    // Get User Drop Off Location
+    var destinationAddress = userDropOffAddress;
+    // Define Header of the Notification
+    Map<String, String> headerNotification = {
+      'Content-Type': 'application/json',
+      'Authorization': cloudMessagingServerToken,
+    };
+    // Define Body of Notification
+    Map bodyNotification = {
+      "body": "Destination Address is $destinationAddress",
+      "title": "New Trip Request",
+    };
+    // Define Data of the Notification
+    Map dataMap = {
+      "click_action": "FLUTTER_NOTIFICATION_CLICK",
+      "id": "1",
+      "status": "done",
+      "rideRequestId": userRideRequestId,
+    };
+    // Define the official notification format
+    Map officialNotificationFormat = {
+      "notification": bodyNotification,
+      "priority": "high",
+      "data": dataMap,
+      "to": deviceRegistrationToken,
+    };
+    // Send Notification to User
+    var responseNotificationUrl = http.post(
+      Uri.parse("https://fcm.googleapis.com/fcm/send"),
+      headers: headerNotification,
+      body: jsonEncode(officialNotificationFormat),
+    );
   }
 }

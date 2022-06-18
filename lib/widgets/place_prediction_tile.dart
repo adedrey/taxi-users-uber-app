@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:users_app/global/global.dart';
 import '../assistants/request_assistant.dart';
 import '../global/map_key.dart';
 import '../infoHandler/app_info.dart';
@@ -7,11 +8,17 @@ import '../infoHandler/directions.dart';
 import '../models/predicted_places.dart';
 import './progress_dialog.dart';
 
-class PlacePredictionListTile extends StatelessWidget {
+class PlacePredictionListTile extends StatefulWidget {
   final PredictedPlaces? predictedPlaces;
 
   PlacePredictionListTile(this.predictedPlaces);
 
+  @override
+  State<PlacePredictionListTile> createState() =>
+      _PlacePredictionListTileState();
+}
+
+class _PlacePredictionListTileState extends State<PlacePredictionListTile> {
   void getPlaceDirectionDetails(String placeId, BuildContext context) async {
     showDialog(
         context: context,
@@ -40,6 +47,10 @@ class PlacePredictionListTile extends StatelessWidget {
       Provider.of<AppInfo>(context, listen: false)
           .updateDropOffLocationAddress(directions);
 
+      setState(() {
+        userDropOffAddress = directions.locationName!;
+      });
+
       Navigator.of(context).pop("obtainedDropOff");
     }
   }
@@ -49,7 +60,7 @@ class PlacePredictionListTile extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         FocusScope.of(context).unfocus();
-        getPlaceDirectionDetails(predictedPlaces!.place_id!, context);
+        getPlaceDirectionDetails(widget.predictedPlaces!.place_id!, context);
       },
       style: ElevatedButton.styleFrom(primary: Colors.white10),
       child: Padding(
@@ -71,7 +82,7 @@ class PlacePredictionListTile extends StatelessWidget {
                     height: 8.0,
                   ),
                   Text(
-                    predictedPlaces!.main_text!,
+                    widget.predictedPlaces!.main_text!,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 16, color: Colors.white54),
                   ),
@@ -79,7 +90,7 @@ class PlacePredictionListTile extends StatelessWidget {
                     height: 8.0,
                   ),
                   Text(
-                    predictedPlaces!.secondary_text!,
+                    widget.predictedPlaces!.secondary_text!,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 12, color: Colors.white54),
                   ),

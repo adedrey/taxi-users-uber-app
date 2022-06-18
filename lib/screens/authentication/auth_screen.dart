@@ -131,7 +131,7 @@ class _AuthScreenState extends State<AuthScreen> {
       // }
       _showSnackBar(message, Theme.of(context).errorColor);
     } catch (err) {
-      print(err);
+      // ...
     }
   }
 

@@ -14,3 +14,6 @@ DirectionDetailsInfo? tripDirectionDetailInfo;
 
 // Store Choosen Driver ID
 String choosenDriverId = "";
+
+// Initialize UserDropOFfAddress for Notification
+String userDropOffAddress = "";
