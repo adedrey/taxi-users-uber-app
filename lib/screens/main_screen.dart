@@ -1,7 +1,6 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -40,6 +39,7 @@ class _MainScreenState extends State<MainScreen> {
   GlobalKey<ScaffoldState> sKey = GlobalKey<ScaffoldState>();
   double searchLocationContainerHeight = 220;
   double waitingResponseFromDriverContainerHeight = 0;
+  double assignedDriverInfoContainerHeight = 0;
   Position? userCurrentPosiiton;
   var geoLocator = Geolocator();
   LocationPermission? _locationPermission;
@@ -65,6 +65,9 @@ class _MainScreenState extends State<MainScreen> {
 
   // Store user ride request
   DatabaseReference? referenceRideRequest;
+
+  // Assigned Driver Ride Status
+  String driverRideStatus = "Driver is Coming";
 
   // Show Active Nearby Available Riders
   List<ActiveNearbyAvaibleDrivers> onlineNearbyAvailableDriversList = [];
@@ -495,6 +498,7 @@ class _MainScreenState extends State<MainScreen> {
           // newRideStatus = accepted
           if (eventSnapShot.snapshot.value == "accepted") {
             // Design and Display Driver Information
+            showUIForAssignedDriverInfo();
           }
         });
       } else {
@@ -512,6 +516,16 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       searchLocationContainerHeight = 0;
       waitingResponseFromDriverContainerHeight = 220;
+    });
+  }
+
+  // Design and Display Driver Information
+  showUIForAssignedDriverInfo() {
+    // Disappear the Position UserDropOff & userPickup Location Container
+    setState(() {
+      searchLocationContainerHeight = 0;
+      waitingResponseFromDriverContainerHeight = 0;
+      assignedDriverInfoContainerHeight = 240;
     });
   }
 
@@ -989,7 +1003,7 @@ class _MainScreenState extends State<MainScreen> {
                             fontWeight: FontWeight.bold),
                       ),
                       ScaleAnimatedText(
-                        ' wait...',
+                        'Please wait...',
                         textAlign: TextAlign.center,
                         duration: const Duration(seconds: 10),
                         textStyle: const TextStyle(
@@ -999,6 +1013,112 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                     ],
                   ),
+                ),
+              ),
+            ),
+          ),
+          // UI for displaying assigned driver information
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: assignedDriverInfoContainerHeight,
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 20,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Status of ride
+                    Center(
+                      child: Text(
+                        driverRideStatus,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.white54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const Divider(
+                      thickness: 2,
+                      height: 2,
+                      color: Colors.white54,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+
+                    // Driver Vehicle Details
+                    Text(
+                      "Tesla Model S",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white54,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 2,
+                    ),
+
+                    // Driver Name
+                    Text(
+                      "John Parker",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white54,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const Divider(
+                      thickness: 2,
+                      height: 2,
+                      color: Colors.white54,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    // Call Driver Button
+                    Center(
+                      child: ElevatedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(
+                          Icons.phone_android,
+                          color: Colors.black54,
+                          size: 22,
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.green,
+                        ),
+                        label: const Text(
+                          "Call Driver",
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
