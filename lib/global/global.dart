@@ -21,3 +21,5 @@ String userDropOffAddress = "";
 String driverCarDetails = "";
 String driverName = "";
 String driverPhone = "";
+// Rating Assigned Driver
+double countRatingStar = 0.0;

@@ -13,7 +13,9 @@ import 'package:users_app/assistants/geofire_assistant.dart';
 import 'package:users_app/infoHandler/app_info.dart';
 import 'package:users_app/main.dart';
 import 'package:users_app/models/active_nearby_available_drivers.dart';
+import 'package:users_app/screens/rate_driver_screen.dart';
 import 'package:users_app/screens/select_nearest_active_driver_screen.dart';
+import 'package:users_app/widgets/pay_fare_amount_dialog.dart';
 import 'package:users_app/widgets/progress_dialog.dart';
 import './search_places_screen.dart';
 import '../widgets/app_drawer.dart';
@@ -570,7 +572,7 @@ class _MainScreenState extends State<MainScreen> {
 
     // Listen to assigned driver details after it ride request has been accepted
     tripRideRequestInfoStreamSubscription =
-        referenceRideRequest!.onValue.listen((eventSnapShot) {
+        referenceRideRequest!.onValue.listen((eventSnapShot) async {
       // if (eventSnapShot.snapshot.value != null) {
       //   print("returned null");
       //   return;
@@ -637,6 +639,39 @@ class _MainScreenState extends State<MainScreen> {
         // Status = ontrip
         if (userRideRequestStatus == "ontrip") {
           updateReachingTimeToUserDropOffLocation(driverCurrentPositionLatLng);
+        }
+
+        // Status = ended
+        if (userRideRequestStatus == "ontrip") {
+          // Retrieve the total fare amount
+          if ((eventSnapShot.snapshot.value as Map)["fareAmount"] != null) {
+            double fareAmount = double.parse(
+                (eventSnapShot.snapshot.value as Map)["fareAmount"].toString());
+            var response = await showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => PayFareAmountDialog(fareAmount: fareAmount),
+            );
+
+            if (response == "cashPayed") {
+              // User can rate the driver now
+
+              // Check if the driverId exist
+              if ((eventSnapShot.snapshot.value as Map)["driverId"] != null) {
+                String assignedDriverId =
+                    (eventSnapShot.snapshot.value as Map)["driverId"]
+                        .toString();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RateDriverScreen(
+                      assignedDriverId: assignedDriverId,
+                    ),
+                  ),
+                );
+              }
+            }
+          }
         }
       }
     });
