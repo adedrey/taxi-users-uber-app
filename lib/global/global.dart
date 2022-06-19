@@ -23,3 +23,4 @@ String driverName = "";
 String driverPhone = "";
 // Rating Assigned Driver
 double countRatingStar = 0.0;
+String titleStarRating = "";

@@ -669,6 +669,10 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ),
                 );
+
+                // Disconnect after listening for any change
+                referenceRideRequest!.onDisconnect();
+                tripRideRequestInfoStreamSubscription!.cancel();
               }
             }
           }
