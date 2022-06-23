@@ -4,6 +4,8 @@ import './directions.dart';
 class AppInfo extends ChangeNotifier {
   Directions? userPickUpLocation;
   Directions? userDropOffLocation;
+  int countTotalTrips = 0;
+  List<String> historyTripKeysList = [];
 
   void updatePickupLocationAddress(Directions userPickUpAddress) {
     userPickUpLocation = Directions(
@@ -24,5 +26,13 @@ class AppInfo extends ChangeNotifier {
       humanReadableAddress: dropOffAddress.locationName,
     );
     notifyListeners();
+  }
+
+  void updateOverallTripsCounter(int overAllTripsCounter) {
+    countTotalTrips = overAllTripsCounter;
+  }
+
+  void updateOverallTripsKeys(List<String> tripsKeysList) {
+    historyTripKeysList = tripsKeysList;
   }
 }

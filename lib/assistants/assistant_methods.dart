@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:users_app/models/trip_history_model.dart';
 import '../infoHandler/app_info.dart';
 import '../models/direction_details_info.dart';
 import '../assistants/request_assistant.dart';
@@ -137,5 +138,58 @@ class AssistantMethods {
       headers: headerNotification,
       body: jsonEncode(officialNotificationFormat),
     );
+  }
+
+  // Retrieve the trip keys for online user
+  // trip key = ride request key
+  static void readTripKeysForOnlineUser(BuildContext context) {
+    FirebaseDatabase.instance
+        .ref()
+        .child("All Ride Requests")
+        .orderByChild("userName")
+        .equalTo(userModelCurrentInfo!.name)
+        .once()
+        .then((snap) {
+      if (snap.snapshot.value != null) {
+        // get all available trips
+        Map keysTripsId = snap.snapshot.value as Map;
+        // Count user  total trips
+        int overAllTripsCounter = keysTripsId.length;
+        // Share with app using Provider
+        Provider.of<AppInfo>(context, listen: false)
+            .updateOverallTripsCounter(overAllTripsCounter);
+        // share ride request ids with Provider
+        List<String> tripsKeysList = [];
+        keysTripsId.forEach((key, value) {
+          tripsKeysList.add(key);
+        });
+        // share with app using Provider
+        Provider.of<AppInfo>(context, listen: false)
+            .updateOverallTripsKeys(tripsKeysList);
+
+        // get trips keys data - read trips complete information...
+        readTripHistoryInformation(context);
+      }
+    });
+  }
+
+  // get trips keys data - read trips complete information...
+  static void readTripHistoryInformation(BuildContext context) {
+    var tripsAllKeys =
+        Provider.of<AppInfo>(context, listen: false).historyTripKeysList;
+    for (String EachKey in tripsAllKeys) {
+      FirebaseDatabase.instance
+          .ref()
+          .child("All Ride Requests")
+          .child(EachKey)
+          .once()
+          .then((snap) {
+        // Initialize from the Model class
+        var eachTripHistory = TripHistoryModel.fromDataSnapShot(snap.snapshot);
+        // Update OverallTrips History Data
+        Provider.of<AppInfo>(context, listen: false)
+            .updateOverAllTripsHistoryInformation(eachTripHistory);
+      });
+    }
   }
 }
