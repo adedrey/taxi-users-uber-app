@@ -27,30 +27,38 @@ class _HistoryDesignUIWidgetState extends State<HistoryDesignUIWidget> {
     return Container(
       color: Colors.black54,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Driver info - name + Fare Amount
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  widget.tripHistoryModel!.driverName!,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Text(
+                    "Driver : " + widget.tripHistoryModel!.driverName!,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(
                   width: 12,
                 ),
                 Text(
-                  widget.tripHistoryModel!.fareAmount!,
+                  "₦" + widget.tripHistoryModel!.fareAmount!,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
+            ),
+            const SizedBox(
+              height: 12,
             ),
             // car_details
             Row(
@@ -58,6 +66,7 @@ class _HistoryDesignUIWidgetState extends State<HistoryDesignUIWidget> {
                 const Icon(
                   Icons.car_repair,
                   color: Colors.grey,
+                  size: 20,
                 ),
                 const SizedBox(
                   width: 12,
@@ -65,8 +74,8 @@ class _HistoryDesignUIWidgetState extends State<HistoryDesignUIWidget> {
                 Text(
                   widget.tripHistoryModel!.car_details!,
                   style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 // const SizedBox(
@@ -74,53 +83,80 @@ class _HistoryDesignUIWidgetState extends State<HistoryDesignUIWidget> {
                 // ),
               ],
             ),
+            const SizedBox(
+              height: 20,
+            ),
             // Icon + pickup
             Row(
               children: [
                 Image.asset(
-                  "img/origin.png",
-                  height: 20,
-                  width: 20,
+                  "assets/img/origin.png",
+                  height: 24,
+                  width: 24,
                 ),
                 const SizedBox(
                   width: 12,
                 ),
-                Text(
-                  widget.tripHistoryModel!.originAddress!,
-                  style: const TextStyle(
-                    fontSize: 18,
+                Expanded(
+                  child: Container(
+                    child: Text(
+                      widget.tripHistoryModel!.originAddress!,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-
+            const SizedBox(
+              height: 12,
+            ),
             // Icon + picdestinationkup
             Row(
               children: [
                 Image.asset(
-                  "img/destination.png",
-                  height: 20,
-                  width: 20,
+                  "assets/img/destination.png",
+                  height: 24,
+                  width: 24,
                 ),
                 const SizedBox(
                   width: 12,
                 ),
-                Text(
-                  widget.tripHistoryModel!.destinationAddress!,
-                  style: const TextStyle(
-                    fontSize: 18,
+                Expanded(
+                  child: Container(
+                    child: Text(
+                      widget.tripHistoryModel!.destinationAddress!,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
+            const SizedBox(
+              width: 12,
+            ),
 
             // Date time
-            Text(
-              formatDateAndTime(widget.tripHistoryModel!.destinationAddress!),
-              style: const TextStyle(
-                color: Colors.grey,
-                // fontSize: 18,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(""),
+                Text(
+                  formatDateAndTime(widget.tripHistoryModel!.time!),
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    // fontSize: 18,
+                  ),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+              ],
             ),
           ],
         ),

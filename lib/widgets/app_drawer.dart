@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:users_app/global/global.dart';
+import 'package:users_app/screens/trips_history_screen.dart';
 import '../screens/splashscreen/splash_screen.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -58,7 +59,14 @@ class AppDrawer extends StatelessWidget {
           ),
           const Divider(),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TripsHistoryScreen(),
+                ),
+              );
+            },
             child: const ListTile(
               leading: Icon(
                 Icons.history,

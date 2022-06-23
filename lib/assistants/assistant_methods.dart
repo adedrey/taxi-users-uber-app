@@ -142,7 +142,7 @@ class AssistantMethods {
 
   // Retrieve the trip keys for online user
   // trip key = ride request key
-  static void readTripKeysForOnlineUser(BuildContext context) {
+  static readTripKeysForOnlineUser(BuildContext context) {
     FirebaseDatabase.instance
         .ref()
         .child("All Ride Requests")
@@ -184,11 +184,14 @@ class AssistantMethods {
           .child(EachKey)
           .once()
           .then((snap) {
+        // Add only trips that has been completed - ended
         // Initialize from the Model class
         var eachTripHistory = TripHistoryModel.fromDataSnapShot(snap.snapshot);
-        // Update OverallTrips History Data
-        Provider.of<AppInfo>(context, listen: false)
-            .updateOverAllTripsHistoryInformation(eachTripHistory);
+        if ((snap.snapshot.value as Map)["status"] == "ended") {
+          // Update OverallTrips History Data
+          Provider.of<AppInfo>(context, listen: false)
+              .updateOverAllTripsHistoryInformation(eachTripHistory);
+        }
       });
     }
   }

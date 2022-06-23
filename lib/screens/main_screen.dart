@@ -260,6 +260,9 @@ class _MainScreenState extends State<MainScreen> {
 
     // Display all nearby drivers
     _initializeGeoFireListener();
+
+    // Get user trip history - Assitant Method
+    AssistantMethods.readTripKeysForOnlineUser(context);
   }
 
   void _checkIfLocationPermissionAllowed() async {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:users_app/models/trip_history_model.dart';
 import './directions.dart';
 
 class AppInfo extends ChangeNotifier {
@@ -6,6 +7,7 @@ class AppInfo extends ChangeNotifier {
   Directions? userDropOffLocation;
   int countTotalTrips = 0;
   List<String> historyTripKeysList = [];
+  List<TripHistoryModel> allTripHistoryInformationList = [];
 
   void updatePickupLocationAddress(Directions userPickUpAddress) {
     userPickUpLocation = Directions(
@@ -28,11 +30,18 @@ class AppInfo extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Update user number of ride request - AssistantMethod
   void updateOverallTripsCounter(int overAllTripsCounter) {
     countTotalTrips = overAllTripsCounter;
   }
 
+  // Get user ride request keys/ids - AssistantMethod
   void updateOverallTripsKeys(List<String> tripsKeysList) {
     historyTripKeysList = tripsKeysList;
+  }
+
+  // Update user each ride request history - AssistantMethod
+  void updateOverAllTripsHistoryInformation(TripHistoryModel eachTripHistory) {
+    allTripHistoryInformationList.add(eachTripHistory);
   }
 }
