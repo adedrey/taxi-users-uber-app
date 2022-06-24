@@ -89,11 +89,6 @@ class _RateDriverScreenState extends State<RateDriverScreen> {
                       titleStarRating = "Excellent";
                     });
                   }
-                  if (countRatingStar == 1) {
-                    setState(() {
-                      titleStarRating = "Very Bad";
-                    });
-                  }
                 },
               ),
               const SizedBox(
