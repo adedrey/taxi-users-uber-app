@@ -57,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 MyApp.restartApp(context);
               },
               style: ElevatedButton.styleFrom(
-                primary: Colors.lightBlueAccent,
+                primary: Colors.white54,
               ),
               child: const Text(
                 "Close",
